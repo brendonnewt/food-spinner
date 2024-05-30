@@ -32,11 +32,15 @@
     });
 </script>
 
-<div style="rotate: {rotation}deg;" class="wheel">
-    <canvas bind:this={canvas} id="wheel" width="400" height="400"></canvas>
+<div class="wheel-panel flex flex-col items-center py-10 gap-10">
+    <h3>Food Wheel</h3>
+    <div style="rotate: {rotation}deg;" class="wheel">
+        <canvas bind:this={canvas} id="wheel" width="400" height="400"></canvas>
+    </div>
+
+    <button class="bg-white text-black p-3 rounded-xl hover:bg-gray-200" on:click={spin}>Spin the Wheel!</button>
 </div>
 
-<button class="bg-white text-black p-3 rounded-xl hover:bg-gray-200" on:click={spin}>Spin the Wheel!</button>
 
 <style>
     .wheel {
