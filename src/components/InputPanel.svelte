@@ -16,6 +16,10 @@
         }
     }
 
+    function fillInput(event) {
+        input = event.target.innerText;
+    }
+
     async function getCurrentLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -44,7 +48,7 @@
 <div class="input-panel">
     <div class="flex flex-col items-center">
         
-        <div class="location-toggle-panel">
+        <div class="location-panel">
 
             <div class="toggle-items">
 
@@ -52,19 +56,25 @@
                 <input type="checkbox" id="location-toggle" class="location-checkbox" on:click={showCustomLocation}/>
                 <label for="location-toggle" class="location-toggle"></label>
 
-
             </div>
+
             <input type="text" placeholder="Enter your location" class="input-text" value={input} on:input={getCitySuggestions} style="visibility : {isChecked ? 'visible' : 'hidden'}" />
             {#if isChecked && suggestions.length > 0}
                 <ul>
                     {#each suggestions as suggestion}
-                        <li>{suggestion}</li>
+                        <li>
+                            <button on:click={fillInput}>{suggestion}</button>
+                        </li>
                     {/each}
                 </ul>
             {/if}
         </div>
+
+        <button class="getBtn">Get Restaurants</button>
         
     </div>
+
+    
     
 </div>
 
@@ -74,7 +84,7 @@
         gap: 10px;
     }
 
-    .location-toggle-panel {
+    .location-panel {
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -139,6 +149,16 @@
         border-radius: 5px;
         border: 1px solid #ccc;
         color: black;
+    }
+
+    .getBtn {
+        padding: 10px;
+        margin-top: 20px;
+        border-radius: 5px;
+        background-color: #169fee;
+        color: white;
+        border: none;
+        cursor: pointer;
     }
 
 
