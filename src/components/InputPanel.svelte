@@ -73,8 +73,6 @@
         <button class="getBtn">Get Restaurants</button>
         
     </div>
-
-    
     
 </div>
 
