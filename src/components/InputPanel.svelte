@@ -1,10 +1,43 @@
 <script>
-
+    import { onMount } from 'svelte';
     let isChecked = false;
-    
+    let location = '';
+    let input = '';
+    let suggestions = [];
+
     function showCustomLocation() {
-        isChecked = !isChecked;
+        if (isChecked) {
+            isChecked = false;
+            input = '';
+            getCurrentLocation();
+            suggestions = [];
+        } else {
+            isChecked = true;
+        }
     }
+
+    async function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                location = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
+            });
+        } else {
+            location = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    async function getCitySuggestions(event) {
+        input = event.target.value;
+        if (input.length > 2) {
+            const response = await fetch(`http://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${input}&limit=5`);
+            const data = await response.json();
+            suggestions = data.data.map(city => city.city);
+        } else {
+            suggestions = ["No suggestions available"];
+        }
+    }
+
+    onMount(getCurrentLocation);
 </script>
 
 
@@ -21,8 +54,14 @@
 
 
             </div>
-            
-            <input type="text" placeholder="Enter your location" class="input-text" style="visibility: {isChecked ? 'visible' : 'hidden'}" />
+            <input type="text" placeholder="Enter your location" class="input-text" value={input} on:input={getCitySuggestions} style="visibility : {isChecked ? 'visible' : 'hidden'}" />
+            {#if isChecked && suggestions.length > 0}
+                <ul>
+                    {#each suggestions as suggestion}
+                        <li>{suggestion}</li>
+                    {/each}
+                </ul>
+            {/if}
         </div>
         
     </div>
