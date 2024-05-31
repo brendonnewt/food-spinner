@@ -1,16 +1,28 @@
 <script>
+
+    let isChecked = false;
     
+    function showCustomLocation() {
+        isChecked = !isChecked;
+    }
 </script>
 
 
 <div class="input-panel">
     <div class="flex flex-col items-center">
-        <p class="location-caption">Use custom location</p>
-
+        
         <div class="location-toggle-panel">
-            <input type="checkbox" id="location-toggle" class="location-checkbox"/>
-            <label for="location-toggle" class="location-toggle"></label>
-            <input type="text" placeholder="Enter your location" class="input-text" />
+
+            <div class="toggle-items">
+
+                <p class="location-caption">Set preferred location</p>
+                <input type="checkbox" id="location-toggle" class="location-checkbox" on:click={showCustomLocation}/>
+                <label for="location-toggle" class="location-toggle"></label>
+
+
+            </div>
+            
+            <input type="text" placeholder="Enter your location" class="input-text" style="visibility: {isChecked ? 'visible' : 'hidden'}" />
         </div>
         
     </div>
@@ -23,9 +35,20 @@
         gap: 10px;
     }
 
+    .location-toggle-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toggle-items {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+
     .location-caption {
         font-size: 1rem;
-        margin: 5px;
     }
 
     .location-toggle {
@@ -76,11 +99,7 @@
         padding: 10px;
         border-radius: 5px;
         border: 1px solid #ccc;
-        visibility: hidden;
-    }
-
-    .location-checkbox:checked + .location-toggle + .input-text {
-        visibility: visible;
+        color: black;
     }
 
 
