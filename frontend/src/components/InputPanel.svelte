@@ -31,15 +31,20 @@
     }
 
     async function getCitySuggestions(event) {
-        input = event.target.value;
-        if (input.length > 2) {
-            const response = await fetch(`http://geodb-free-service.wirefreethought.com/v1/geo/cities?namePrefix=${input}&limit=5`);
-            const data = await response.json();
-            suggestions = data.data.map(city => city.city);
-        } else {
-            suggestions = ["No suggestions available"];
+    input = event.target.value;
+    if (input.length > 2) {
+        try {
+            const response = await fetch(`http://localhost:5000/api/suggestions?input=${input}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            suggestions = await response.json();
+        } catch (error) {
+            console.error('An error occurred while fetching city suggestions:', error);
+            suggestions = [];
         }
     }
+}
 
     onMount(getCurrentLocation);
 </script>
@@ -59,11 +64,15 @@
             </div>
 
             <input type="text" placeholder="Enter your location" class="input-text" value={input} on:input={getCitySuggestions} style="visibility : {isChecked ? 'visible' : 'hidden'}" />
-            {#if isChecked && suggestions.length > 0}
+            {#if isChecked && suggestions != undefined && suggestions.length > 0}
                 <ul>
                     {#each suggestions as suggestion}
                         <li>
-                            <button on:click={fillInput}>{suggestion}</button>
+                            {#if suggestion === "No suggestions available"}
+                                <p>{suggestion}</p>
+                            {:else}
+                                <button on:click={fillInput}>{suggestion}</button>
+                            {/if}
                         </li>
                     {/each}
                 </ul>
