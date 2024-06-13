@@ -28,13 +28,12 @@ app.get('/api/suggestions', async (req, res) => {
         const fetch = (await import('node-fetch')).default; // Use dynamic import for node-fetch
         const response = await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?q=${input}&language=en&types=city&session_token=${sessionToken}&access_token=${mapboxAccessToken}`);
         const data = await response.json();
+        console.log('Received response:', data);
         if (!data.suggestions || data.suggestions.length === 0) {
             console.error('No features in response:', data);
             return res.status(500).json({ error: 'An error occurred while processing your request.' });
         }
-        const suggestions = data.suggestions.map(suggestion => suggestion.name);
-        console.log(`Returning suggestions: ${suggestions}`);
-        res.json(suggestions);
+        res.json(data.suggestions.map(suggestion => suggestion));
     } catch (error) {
         console.error('An error occurred while fetching data from Mapbox:', error);
         res.status(500).json({ error: 'An error occurred while processing your request.' });

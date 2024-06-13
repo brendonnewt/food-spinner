@@ -4,6 +4,7 @@
     let location = '';
     let input = '';
     let suggestions = [];
+    let restaurants = [];
 
     function showCustomLocation() {
         if (isChecked) {
@@ -44,6 +45,19 @@
             suggestions = [];
         }
     }
+
+    async function getRestaurants() {
+        try {
+            const response = await fetch(`http://localhost:5000/api/restaurants?location=${location}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            restaurants = await response.json();
+            console.log(restaurants);
+        } catch (error) {
+            console.error('An error occurred while fetching restaurants:', error);
+        }
+    }
 }
 
     onMount(getCurrentLocation);
@@ -71,7 +85,7 @@
                             {#if suggestion === "No suggestions available"}
                                 <p>{suggestion}</p>
                             {:else}
-                                <button on:click={fillInput}>{suggestion}</button>
+                                <button on:click={fillInput}>{`${suggestion.name}, ${suggestion.place_formatted}`}</button>
                             {/if}
                         </li>
                     {/each}
