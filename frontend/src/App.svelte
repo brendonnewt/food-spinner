@@ -1,14 +1,19 @@
 <script>
 	import Wheel from './components/Wheel.svelte';
 	import InputPanel from './components/InputPanel.svelte';
-	let slices = ['Pizza', 'Burger', 'Pasta', 'Sushi', 'Salad', 'Tacos', 'Ice Cream', 'Donuts', 'Fruit', 'Cake'];
+	let restaurants = [];
+
+    // Function to update restaurants
+    function updateRestaurants(newRestaurants) {
+        restaurants = newRestaurants;
+    }
 </script>
 
 <main>
 	<div class="flex flex-row items-center gap-10">
-		<InputPanel />
+		<InputPanel {updateRestaurants} />
 
-		<Wheel {slices} />
+		<Wheel {restaurants} />
 
 	</div>
 </main>

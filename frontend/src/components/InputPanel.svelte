@@ -4,7 +4,7 @@
     let location = [];
     let input = '';
     let suggestions = [];
-    let restaurants = [];
+    export let updateRestaurants;
 
     function showCustomLocation() {
         if (isChecked) {
@@ -82,8 +82,7 @@
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            restaurants = await response.json();
-            console.log("Restaurants: ", restaurants);
+            updateRestaurants(await response.json());
         } catch (error) {
             console.error('An error occurred while fetching restaurants:', error);
         }

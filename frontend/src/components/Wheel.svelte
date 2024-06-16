@@ -1,8 +1,7 @@
 <script>
-    import { onMount } from 'svelte';
-    export let slices;
     let rotation = 0;
     let canvas;
+    export let restaurants;
 
     let colors = ["#ffadad", "#ffd6a5", "#fdffb6", "#caffbf", "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#fffffc"];
 
@@ -14,22 +13,33 @@
         return colors[index % colors.length];
     }
 
-    onMount(() => {
+    $: if (canvas && restaurants) {
         // Draw the wheel
         const ctx = canvas.getContext('2d');
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         // Get the radius and slice angle
         const radius = canvas.width / 2;
-        const sliceAngle = 2 * Math.PI / slices.length;
+        const sliceAngle = 2 * Math.PI / restaurants.length;
 
         // Draw the slices
-        for (let i = 0; i < slices.length; i++) {
+        for (let i = 0; i < restaurants.length; i++) {
             ctx.beginPath();
             ctx.arc(radius, radius, radius, i * sliceAngle, (i + 1) * sliceAngle);
             ctx.lineTo(radius, radius);
             ctx.fillStyle = getColor(i);
             ctx.fill();
+
+            // Add restaurant name
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(i * sliceAngle);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "black";
+            ctx.fillText(restaurants[i].text, radius-10, 10);
+            ctx.restore();
         }
-    });
+    }
 </script>
 
 <div class="wheel-panel flex flex-col items-center py-10 gap-10">
