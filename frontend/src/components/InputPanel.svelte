@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     let isChecked = false;
-    let location = '';
+    let location = [];
     let input = '';
     let suggestions = [];
     let restaurants = [];
@@ -24,41 +24,70 @@
     async function getCurrentLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
-                location = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
+                location = [position.coords.longitude, position.coords.latitude];
             });
         } else {
-            location = "Geolocation is not supported by this browser.";
+            location = [];
         }
     }
 
     async function getCitySuggestions(event) {
-    input = event.target.value;
-    if (input.length > 2) {
-        try {
-            const response = await fetch(`http://localhost:5000/api/suggestions?input=${input}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        input = event.target.value;
+        if (input.length > 2) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/suggestions?input=${input}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                suggestions = await response.json();
+            } catch (error) {
+                console.error('An error occurred while fetching city suggestions:', error);
+                suggestions = [];
             }
-            suggestions = await response.json();
-        } catch (error) {
-            console.error('An error occurred while fetching city suggestions:', error);
-            suggestions = [];
         }
     }
 
     async function getRestaurants() {
+        // If the user manually entered a location
+        if (isChecked) {
+            // Longitude and Latitude have to be extracted from the input
+            try {
+                const response = await fetch(`http://localhost:5000/api/coordinates?location=${input}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                location = await response.json();
+                console.log("Location: ", location);
+            } catch (error) {
+                console.error('An error occurred while fetching restaurants:', error);
+                throw error;
+            }
+        }
+
+        if (location === null) {
+            alert("The location could not be determined. Please enter a location manually.");
+            return;
+        }
+
+        if (location.length === 0) {
+            alert("Please enable location services or enter a location manually");
+            return;
+        }
+
+        console.log("Location: ", location);
+
+        // Fetch restaurants based on the locations coordinates
         try {
-            const response = await fetch(`http://localhost:5000/api/restaurants?location=${location}`);
+            const response = await fetch(`http://localhost:5000/api/restaurants?lon=${location[0]}&lat=${location[1]}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             restaurants = await response.json();
-            console.log(restaurants);
+            console.log("Restaurants: ", restaurants);
         } catch (error) {
             console.error('An error occurred while fetching restaurants:', error);
         }
     }
-}
 
     onMount(getCurrentLocation);
 </script>
@@ -93,7 +122,7 @@
             {/if}
         </div>
 
-        <button class="getBtn">Get Restaurants</button>
+        <button on:click={getRestaurants} class="getBtn" >Get Restaurants</button>
         
     </div>
     
