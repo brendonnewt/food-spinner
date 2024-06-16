@@ -1,12 +1,14 @@
 <script>
     import { onMount } from 'svelte';
-    let isChecked = false;
-    let location = [];
-    let input = '';
-    let suggestions = [];
+    let isChecked = false;  //  Sets visibility of the custom fields
+    let location = [];  // [longitude, latitude]
+    let input = ''; // Custom location input
+    let suggestions = [];   //  Suggestions for the custom location
+    let preferredDistance = 5; // Measured in miles
     export let updateRestaurants;
     export let updateShowing;
 
+    // Function to show the custom location fields
     function showCustomLocation() {
         if (isChecked) {
             isChecked = false;
@@ -18,10 +20,13 @@
         }
     }
 
+    // Function to fill the input field with the selected suggestion
     function fillInput(event) {
         input = event.target.innerText;
     }
 
+
+    // Function to get the users current location
     async function getCurrentLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -32,15 +37,20 @@
         }
     }
 
+    // Function to get suggestions for the custom location
     async function getCitySuggestions(event) {
         input = event.target.value;
+        // If the input is not long enough, do not fetch suggestions
         if (input.length > 2) {
             try {
+                // Fetch suggestions from the backend
                 const response = await fetch(`http://localhost:5000/api/suggestions?input=${input}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                // Parse the response
                 suggestions = await response.json();
+            // If an error occurs, set suggestions to an empty array
             } catch (error) {
                 console.error('An error occurred while fetching city suggestions:', error);
                 suggestions = [];
@@ -48,15 +58,18 @@
         }
     }
 
+    // Function to get restaurants based on the location
     async function getRestaurants() {
         // If the user manually entered a location
         if (isChecked) {
             // Longitude and Latitude have to be extracted from the input
             try {
+                // Fetch the coordinates from the backend
                 const response = await fetch(`http://localhost:5000/api/coordinates?location=${input}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                // Parse the response
                 location = await response.json();
                 console.log("Location: ", location);
             } catch (error) {
@@ -65,11 +78,13 @@
             }
         }
 
+        // If there is an error with automatic location, alert the user
         if (location === null) {
             alert("The location could not be determined. Please enter a location manually.");
             return;
         }
 
+        // If the location is still empty, alert the user
         if (location.length === 0) {
             alert("Please enable location services or enter a location manually");
             return;
@@ -77,19 +92,28 @@
 
         console.log("Location: ", location);
 
+        if (preferredDistance === undefined || preferredDistance === null || preferredDistance <= 0) {
+            alert("Please enter a preferred distance greater than 0");
+            return;
+        }
+
         // Fetch restaurants based on the locations coordinates
         try {
-            const response = await fetch(`http://localhost:5000/api/restaurants?lon=${location[0]}&lat=${location[1]}`);
+            // Fetch restaurants from the backend
+            const response = await fetch(`http://localhost:5000/api/restaurants?lon=${location[0]}&lat=${location[1]}&distance=${preferredDistance * 1609.34}`);    // 1 mile = 1609.34 meters
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+            // Parse the response
             updateRestaurants(await response.json());
+            // Show the wheel
             updateShowing();
         } catch (error) {
             console.error('An error occurred while fetching restaurants:', error);
         }
     }
 
+    // Get the users current location on mount
     onMount(getCurrentLocation);
 </script>
 
@@ -107,7 +131,10 @@
 
             </div>
 
+            
+
             <input type="text" placeholder="Enter your location" class="input-text" value={input} on:input={getCitySuggestions} style="visibility : {isChecked ? 'visible' : 'hidden'}" />
+
             {#if isChecked && suggestions != undefined && suggestions.length > 0}
                 <ul>
                     {#each suggestions as suggestion}
@@ -115,12 +142,16 @@
                             {#if suggestion === "No suggestions available"}
                                 <p>{suggestion}</p>
                             {:else}
-                                <button on:click={fillInput}>{`${suggestion.name}, ${suggestion.place_formatted}`}</button>
+                                <button class="suggestion" on:click={fillInput}>{`${suggestion.name}, ${suggestion.place_formatted}`}</button>
                             {/if}
                         </li>
                     {/each}
                 </ul>
             {/if}
+
+            <p class="location-caption">Preferred Distance (in miles)</p>
+            <input type="number" placeholder="Enter preferred distance in miles" class="input-text" bind:value={preferredDistance} />
+            
         </div>
 
         <button on:click={getRestaurants} class="getBtn" >Get Restaurants</button>
@@ -200,6 +231,20 @@
         border-radius: 5px;
         border: 1px solid #ccc;
         color: black;
+    }
+
+    .suggestion {
+        padding: 7px;
+        border-radius: 5px;
+        margin: 5px;
+        background-color: #92acc7;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .suggestion:hover {
+        background-color: #169fee;
     }
 
     .getBtn {

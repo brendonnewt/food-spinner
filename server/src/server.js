@@ -92,18 +92,20 @@ app.get('/api/coordinates', async (req, res) => {
 app.get('/api/restaurants', async (req, res) => {
     const latitude = req.query.lat;
     const longitude = req.query.lon;
+    const radius = req.query.distance;
 
     // If the latitude or longitude is empty, return a message
-    if (!latitude || !longitude) {
+    if (!latitude || !longitude || !radius) {
         return res.json(["No restaurants available"]);
     }
 
     console.log(`Received latitude: ${latitude}, longitude: ${longitude}`);
+    console.log(`Received radius: ${radius}`);
 
     // Fetch data from the Mapbox API
     try {
         const fetch = (await import('node-fetch')).default;
-        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/fast%20food.json?proximity=${longitude},${latitude}&types=poi&limit=10&access_token=${mapboxAccessToken}`);
+        const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/fast%20food.json?proximity=${longitude},${latitude}&radius=${radius}&types=poi&limit=10&access_token=${mapboxAccessToken}`);
         const data = await response.json();
         console.log('Received response:', data);
         // If there are no features, return an error message
