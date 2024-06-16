@@ -42,8 +42,7 @@
     }
 </script>
 
-<div class="wheel-panel flex flex-col items-center py-10 gap-10">
-    <h3>Food Wheel</h3>
+<div class="wheel-panel flex flex-col items-center gap-10">
     <div style="rotate: {rotation}deg;" class="wheel">
         <canvas bind:this={canvas} id="wheel" width="400" height="400"></canvas>
     </div>
